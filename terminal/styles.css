@@ -1,0 +1,21 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    color: white;
+    caret-color: white;
+}
+
+*::selection {
+    background: white;
+    color: white;
+}
+
+#terminal {
+    width: 100vw;
+}
+
+.line {
+    font-family: monospace;
+    white-space: pre;
+}
