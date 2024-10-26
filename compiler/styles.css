@@ -1,0 +1,25 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#panel {
+    display: flex;
+    overflow: hidden;
+    height: 100%;
+}
+
+#topBar {
+    margin: 5px;
+}
+
+#topBar * {
+    padding: 10px;
+}
+
+textarea {
+    flex: 1;
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Document</title>
+</head>
+<body>
+    <div id="topBar">
+        <span>cool compiler</span>
+        <button id="run">run</button>
+        <button id="tree">view syntax tree</button>
+        <button id="il">view il</button>
+        <button id="clear">clear</button>
+        <a href="https://github.com/2CM/h-diminished/blob/main/README.md">view info</a>
+    </div>
+    <div id="panel">
+        <textarea name="" id="code"></textarea>
+        <textarea name="" id="output" readonly="true"></textarea>
+    </div>
+</body>
+</html>
+
+<script src="compiler.js"></script>
+<script src="interactor.js"></script>
