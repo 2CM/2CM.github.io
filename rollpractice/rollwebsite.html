@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>roll website</title>
+</head>
+<body>
+    <canvas id="canv"></canvas>
+    <p id="stdev">standard deviation: </p>
+    <p id="bestStdev">best standard deviation: </p>
+</body>
+</html>
+
+<script>
+let canv = document.getElementById("canv")
+canv.width = 1000;
+canv.height = 100;
+let ctx = canv.getContext("2d");
+
+function drawLine(start, end, width = 5, color = "white") {
+    ctx.beginPath();
+    ctx.moveTo(...start)
+    ctx.lineTo(...end)
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.closePath();
+}
+
+let rollKeys = "1234".split("");
+let keyData = [];
+let keys = {};
+let firstKeyPress = -1;
+let dt = 1000/60;
+let waiting = true;
+let bestStdev = 7823478243;
+
+document.addEventListener("keydown", e => {
+    if(waiting) keyData = [];
+    waiting = false;
+
+    keys[e.key] = performance.now();
+
+    if(firstKeyPress == -1) firstKeyPress = performance.now();
+
+    keyData.push({key: e.key, start: performance.now() - firstKeyPress});
+
+    parseData()
+})
+
+document.addEventListener("keyup", e => {
+    delete keys[e.key];
+
+    if(Object.keys(keys).length == 0) {
+        finishParsing();
+
+        waiting = true;
+        firstKeyPress = -1;
+    }
+})
+
+function initCanvas() {
+    ctx.fillStyle = "black"
+    ctx.fillRect(0,0,1000,100)
+
+    drawLine([0,50], [1000,50])
+
+    for(let i = 0; i < 10; i++) {
+        drawLine([i * 100, 40], [i * 100, 60])
+    }
+}
+
+function distanceToColor(distance) {
+    let late = Math.max(distance, 0);
+    let early = -Math.min(distance, 0);
+    
+    let red = 1 - early
+    let green = 1 - late
+    let blue = 1 - early - late
+
+    return `rgb(${red * 255}, ${green * 255}, ${blue * 255})`
+}
+
+function parseData() {
+    initCanvas();
+
+    for(let i = 0; i < keyData.length; i++) {
+        let keyDatum = keyData[i];
+
+        drawLine([keyDatum.start / dt * 100, 10], [keyDatum.start / dt * 100, 30], 5, distanceToColor(keyDatum.start / dt - i))
+    }
+}
+
+function finishParsing() {
+    let stdev = Math.sqrt(keyData.map((a, i) => (a.start / dt - i) ** 2).reduce((a,b) => a + b)/keyData.length);
+    let gotNewBest = false;
+
+    if(stdev < bestStdev) {
+        bestStdev = stdev;
+
+        gotNewBest = true;
+    }
+
+    document.getElementById("stdev").innerHTML = `standard deviation: ${stdev}`
+    document.getElementById("bestStdev").innerHTML = `best standard deviation: ${bestStdev}` + (gotNewBest ? " (new best!)" : "")
+}
+
+initCanvas();
+
+
+</script>
