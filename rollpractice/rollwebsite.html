@@ -15,7 +15,7 @@
 <script>
 let canv = document.getElementById("canv")
 canv.width = 1000;
-canv.height = 100;
+canv.height = 300;
 let ctx = canv.getContext("2d");
 
 function drawLine(start, end, width = 5, color = "white") {
@@ -28,7 +28,6 @@ function drawLine(start, end, width = 5, color = "white") {
     ctx.closePath();
 }
 
-let rollKeys = "1234".split("");
 let keyData = [];
 let keys = {};
 let firstKeyPress = -1;
@@ -44,30 +43,47 @@ document.addEventListener("keydown", e => {
 
     if(firstKeyPress == -1) firstKeyPress = performance.now();
 
-    keyData.push({key: e.key, start: performance.now() - firstKeyPress});
+    keyData.push({key: e.key, start: performance.now() - firstKeyPress, end: performance.now() - firstKeyPress});
 
     parseData()
 })
 
 document.addEventListener("keyup", e => {
+    let keyDataKey = keyData.filter(a => a.key == e.key)
+
+    console.log(keyDataKey[0])
+    
+    keyDataKey[0].end = performance.now() - firstKeyPress;
+    
+    console.log(keyDataKey[0])
+
+    parseData()
+
     delete keys[e.key];
 
-    if(Object.keys(keys).length == 0) {
-        finishParsing();
 
-        waiting = true;
-        firstKeyPress = -1;
+    if(Object.keys(keys).length == 0) {
+        setTimeout(() => {
+            finishParsing();
+
+            waiting = true;
+            firstKeyPress = -1;
+        }, 100);
     }
 })
 
 function initCanvas() {
     ctx.fillStyle = "black"
-    ctx.fillRect(0,0,1000,100)
+    ctx.fillRect(0,0,1000,canv.height)
 
-    drawLine([0,50], [1000,50])
+    drawLine([0,canv.height - 50], [1000,canv.height - 50])
 
     for(let i = 0; i < 10; i++) {
-        drawLine([i * 100, 40], [i * 100, 60])
+        drawLine([i * 100, 0], [i * 100, canv.height], 1, "rgba(255,255,255,0.5)")
+        drawLine([i * 100, canv.height - 40], [i * 100, canv.height - 60])
+        
+        ctx.fillStyle="white"
+        ctx.fillText(`${(i * 1000/60).toFixed(1)} ms`, i * 100 + 5, canv.height - 40)
     }
 }
 
@@ -88,11 +104,17 @@ function parseData() {
     for(let i = 0; i < keyData.length; i++) {
         let keyDatum = keyData[i];
 
-        drawLine([keyDatum.start / dt * 100, 10], [keyDatum.start / dt * 100, 30], 5, distanceToColor(keyDatum.start / dt - i))
+        let vo = i * 20; //vertical offset
+
+        drawLine([keyDatum.start / dt * 100, canv.height - 90 - vo], [keyDatum.start / dt * 100, canv.height - 70 - vo], 5, distanceToColor(keyDatum.start / dt - i))
+        drawLine([keyDatum.start / dt * 100, canv.height - 80 - vo], [keyDatum.end / dt * 100, canv.height - 80 - vo], 5, distanceToColor(keyDatum.start / dt - i))
+        ctx.fillText(keyDatum.key, keyDatum.end / dt * 100 + 5, canv.height - 80 - vo)
     }
 }
 
 function finishParsing() {
+    if(keyData.length == 1) return;
+
     let stdev = Math.sqrt(keyData.map((a, i) => (a.start / dt - i) ** 2).reduce((a,b) => a + b)/keyData.length);
     let gotNewBest = false;
 
